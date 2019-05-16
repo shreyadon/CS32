@@ -1,0 +1,1555 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\fonttbl\f0\fswiss\fcharset0 LucidaConsole;\f1\fswiss\fcharset0 Helvetica;\f2\fmodern\fcharset0 Courier;
+}
+{\colortbl;\red255\green255\blue255;\red255\green255\blue0;\red255\green0\blue0;\red128\green0\blue128;
+}
+\paperw11900\paperh16840\margl1440\margr1440\vieww13260\viewh9840\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Lecture 1\
+\
+Project: are scored on correctness, documentation, comments. \
+Homework: no need for comments, not all problems are corrected. \
+\
+Start early!!!\
+\
+Develop incrementally!!!\
+\
+Read the spec!!!\
+\
+Classes: hide details from most of the program. all you need to know is the interface. \
+interface(public, member functions), implementation(data members and the body of the member functions) \
+\
+\
+interface and implementation\
+what			how\
+\
+\
+#include <iostream>\
+#include <cstdlib> // for the exit function\
+#include <cmath>\
+using namespace std;\
+\
+class Circle\
+\{\
+	public:\
+		Circle(double x, double y, double r);\
+		bool scale(double factor);\
+		void draw() \cb2 const\cb1 ;\
+		double radius() \cb2 const\cb1 ;\
+	private: // in general data members are always private. \
+		// Invariant : m_r  >  0; (think about the boundary case when you use a directional 	comparison operator)\
+		double m_x;\
+		double m_y;\
+		double m_r;\
+\}\
+\
+// document restrictions, so when you are working on implementing functions later, you don\'92t miss out.\
+// or someone else working on your code won\'92t be confused or implement it wrong\
+// prevent inconsistencies\
+double area(Circle x);\
+\
+int main()\
+\{\
+	Circle c(-2, 5, 10); // create a circle with centre(-2, 5) and radius 10\
+	c.scale(2); // double the radius\
+	double sf;\
+	cin >> sf;\
+	if (! c.scale(sf))\
+		\'85 it didn\'92t work \'85 \
+	c.draw(); // draws the circle on the screen\
+	cout << area(c); // outputs the area of the circle.\
+	\cb2 // cout << c.m_r; shouldn\'92t be allowed to do this because then the implementor of the class will lose freedom to change the implementation of the class.\cb1 \
+\}\
+\
+Circle::Circle (double x, double y, double r)\
+ : m_x(x), m_y(y), m_r(r)\
+\{\
+	if (r <= 0)\
+	\{\
+		cerr << \'93Cannot create a circle with radius\'94 << r << endl;\
+		exit(1); // exit status for failure is a non zero and exit status for success is a zero(0)\
+	\}\
+	// don\'92t need the following if you use a member initialization list\
+	//m_x = x;\
+	//m_y = y;\
+	// m_r = r; \
+\}\
+\
+\'93member initialization list\'94\
+\
+bool Circle::scale(double factor)\
+\{\
+	if (factor <= 0)\
+	\{\
+		return false;\
+	\}\
+		\
+	m_r *= factor;\
+	return true;\
+\}\
+\
+void Circle::draw() \cb2 const\cb1 \
+\{\
+	\'85 draw the circle \'85\
+\}\
+\
+double Circle::radius() \cb2 const\cb1 \
+\{\
+	return m_r;\
+\}\
+\
+double area(Circle x) // pass by value. x will be a brand new circle object - a copy of c. area can not modify circle.\
+\{\
+	return PI * x.radius() * x.radius();\
+\}\
+\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+  source file picture.cpp\
+	|\
+	v\
+  compile\
+	|\
+	v\
+object file pictures.obj or pictures.o\
+	|\
+	v	\
+  link  (if the program can not produce an executable if it can not link functions)\
+	|\
+	v	\
+executable pictures.exe or a.out\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97
+\f1 \
+\
+\
+
+\f0 Lecture 2\
+\
+continued\'85 from Lecture 1 \
+double area(const Circle& x) // copy by reference is cheaper than to not pass by reference. Here area is not modifying the circle, so pass by const reference. Promise not to modify the circle \
+\{\
+	return PI * x.radius() * x.radius(); // compiler will complain. const function can not call function that is not const too. \
+\}\
+\
+\
+Change radius() declaration. Highlighted in \cb2 yellow\cb1 . \
+Change draw() because it doesn\'92t modify the circle. Also, highlighted in \cb2 yellow\cb1 .\
+Document invariant properties. Constructors can never be const.\
+\
+Project 1:\
+Dealing with large programs.\
+\
+myapp.cpp	db.cpp	net.cpp\
+	|			|		|   COMPILE\
+	v			v		v\
+myapp.obj	db.obj	net.obj\
+\
+linker\'92s job - take all object files and make executable file. \
+	|\
+	v\
+Executable. \
+\
+Linking is much faster than compiling.  \
+\
+Header Files:\
+blah.h contains function prototypes, declare functions \
+\
+Suppose myapp.cpp uses functions from blah than #include \'93blah.h\'94 at the top of the file \
+\
+blah.cpp needs to #include \'93blah.h\'94\
+blah.cpp (implementation file) is where you would implement the functions declared in blah.h\
+\
+myapp.cpp\
+\
+#include \'93blah.h\'94 \'97> linker???\
+\
+int main()\
+\{\
+	blah b(\'85);\
+	area(b);\
+\}\
+\
+\cb2 Never include .cpp file and .h should not contain implementations.\cb1 \
+\
+Point.h\
+\'97\'97\'97\'97\'97\'97\'97\
+\
+\cb2 #indef POINT_INCLUDED\cb1 \
+\cb2 #define POINT_INCLUDED\cb1 \
+\
+class Point\
+\{\
+	\'85\
+\};\
+\
+\cb2 #endif // POINT_INCLUDED\cb1 \
+Circle.h\
+\'97\'97\'97\'97\'97\'97\'97\'97\
+\cb2 #indef CIRCLE_INCLUDED\cb1 \
+\cb2 #define CIRCLE_INCLUDED\cb1 \
+\
+#include \'93Point.h\'94\
+\
+Class Circle\
+\{\
+	\'85\
+	Point m_center;\
+\}\
+\
+\cb2 #endif // CIRCLE_INCLUDED\cb1 \
+\
+myapp.cpp\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+#include \'93Circle.h\'94\
+#include \'93Point.h\'94 // fails to compile. compiler sees two declarations of the Point class. \cb2 Unless you add include guard.\cb1  Should do with every header file. See above highlighted in yellow.\
+\
+int main()\
+\{\
+	Circle c(\'85);\
+	Point p(\'85);\
+	\'85\
+\}\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97
+\f1 \
+\
+\
+
+\f0 Lecture 3 & 4\
+\
+continued\'85 from Lecture 2\
+if you have a circle and point and add Point.h and Circle.h\
+don\'92t leave anything outside the include guards\
+\
+Student.h\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+#ifndef STUDENT_INCLUDED\
+#define STUDENT_INCLUDED\
+\
+// #include \'93Course.h\'94 break dependency by not including the header but using independent type declaration.\
+class Course; \
+\
+class Student\
+\{\
+	\'85\
+	Course* m_studyList[10];\
+\};\
+\
+#endif //STUDENT_INCLUDED\
+\
+Course.h\
+\'97\'97\'97\'97\'97\'97\'97\'97\
+#ifndef COURSE_INCLUDED\
+#define COURSE_INCLUDED\
+\
+//#include \'93Student.h\'94 break dependency by not including the header but using independent type declaration. \
+\
+class Student;\
+\
+class Course\
+\{\
+	\'85\
+	Student m_roaster[1000];\
+\};\
+\
+#endif //COURSE_INCLUDED\
+\
+Blah.h\
+\'97\'97\'97\'97\'97\'97\
+\
+#include <string>\
+class Blah\
+\{\
+	\'85std::string\'85\
+\};\
+\
+myapp.cpp\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+#include \'93Course.h\'94\
+#include \'93Blah.h\'94\
+#include <iostream>\
+#include <string> // include all headers that appears you need, you shouldn\'92t need to know what headers other header files have. \
+\
+int main()\
+\{\
+	Course c(\'85);\
+	\'85\'85\
+\}\
+// won\'92t compile \
+\
+\'93circular dependency\'94 \'97> problem \
+Student depends on Course and Course depends on Student\
+\
+\'93incomplete type declarations\'94\
+using for pointers to type. don\'92t include unnecessary header files.\
+\
+CIRCULAR DEPENDENCY RULES\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f2 \cf0 \expnd0\expndtw0\kerning0
+If the file Foo.h defines the class Foo, when does another file require\
+you to say\
+  #include "Foo.h"\
+and when can you instead simply provide the incomplete type declaration\
+  class Foo;\
+\
+You have to #include the header file defining a class when\
+ * you declare a data member of that class type\
+ * you declare a container (e.g. a vector) of objects of that class \
+type\
+ * you create an object of that class type\
+ * you use a member of that class type\
+\
+class Blah\
+\{\
+    ...\
+    void g(Foo f, Foo& fr, Foo* fp);  // just need to say   class Foo;\
+    ...\
+    Foo* m_fp;           // just need to say   class Foo;\
+    Foo* m_fpa[10];      // just need to say   class Foo;\
+    vector<Foo*> m_fpv;  // just need to say   class Foo;\
+\
+    Foo m_f;             // must #include Foo.h\
+    Foo m_fa[10];        // must #include Foo.h\
+    vector<Foo> m_fv;    // must #include Foo.h\
+\};\
+\
+void Blah::g(Foo f, Foo& fr, Foo* fp)\
+\{\
+    Foo f2(10, 20);      // must #include Foo.h\
+    f.gleep();           // must #include Foo.h\
+    fr.gleep();          // must #include Foo.h\
+    fp->gleep();         // must #include Foo.h\
+\}\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 \
+\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+Stick Figure:\
+\
+Circle.h\
+\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+class Circle\
+\{\
+	public:\
+		Circle(double x, double y, double r);\
+		\'85\'85\'85\'85\
+	private:\
+		double m_x;\
+		double m_y;\
+		double m_r;\
+\};\
+\
+Circle.cpp\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+#include \'93Circle.h\'94\
+\
+Circle::Circle (double x, double y, double r)\
+ : m_x(x), m_y(y), m_r(r)\
+\{\}\
+\
+StickFigure.h\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+#include \'93Circle.h\'94\
+class StickFigure\
+\{\
+public: \
+	StickFigure(double bl, double hd, std::string nm, double hx, double hy);\
+\
+\'85\'85\'85\'85\
+private:\
+	std::string m_name;\
+	Circle m_head;\
+	double m_bodyLength;\
+\}\
+\
+StickFigure.cpp\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+#include \'93StickFigure.h\'94\
+#include <string>\
+using namespace std;\
+\
+StickFigure:: StickFigure(double bl, double hd, std::string nm, double hx, double hy) : \cb2 m_name(nm), m_head(hx, hy, hd),m_bodyLength(bl)\cb1 \
+\{\
+	//initialised differently above\
+	//m_name = nm;\
+	//m_bodyLength = bl;\
+	// m_head = ????; anything placed in place of the question marks will 	not compile.\
+\}\
+\
+main.cpp\
+\'97\'97\'97\'97\'97\'97\'97\'97\
+#include \'93StickFigure.h\'94\
+\
+int main()\
+\{\
+	StickFigure sf(5, 3, \'93Fred\'94, -2, 5);\
+\}\
+\
+How objects are constructed:\
+1. \'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+2. Construct the data members, consulting the member initialisation list.\
+3. Execute the body of the constructor.\
+\
+If you \cf3 don\'92t\cf0  include a member in the member initialisation list\
+	* if it is a class type -> default constructor\
+	* if it is a built-in type -> uninitialised \
+\
+\
+struct Employee\
+\{\
+	string name;\
+	int age;\
+	double salary;\
+	Circle spot; // compilation error, no default constructor for Circle.\
+\}\
+\
+Employee e; // if you don\'92t write a constructor, the compiler writes a default constructor for employee  \
+\
+compiler writes this:\
+Employee:: Employee()\
+\{\} \
+// name = \'93\'94, age and salary are uninitialised. but Circle doesn\'92t have a default constructor -> compile error\
+\
+Resource Management\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+void h(String t)\
+\{\
+	String u(\'93Wow\'94);\
+	..\
+	u = t; // u.assign(t); copy constructor is not called, u is not a 	brand new object. Assignment is not construction.\
+	..\
+\}\
+\
+void f()\
+\{\
+	String s(\'93Hello\'94); // String different from string\
+	g(s); // pointer to array and string gets copied written but the 	compiler if you don\'92t write a copy constructor, effects s if class 	doesn\'92t have a copy constructor\
+	String t; // treats it as String t(\'93\'94);\
+	String u((g\'85));\
+	\'85\
+	if (\'85)\
+		return;\
+	\'85\
+\}\
+\
+char* g(\'85) // might return nullptr\
+\{\
+	\'85\
+\}\
+\
+int main()\
+\{\
+	for(\'85;\'85;\'85)\
+		f();\
+	\'85\
+\}\
+String.h\
+\'97\'97\'97\'97\'97\'97\'97\'97\
+class String\
+\{\
+public:\
+	String(const char* value = \'93\'94); // same as const char value[];\
+	//String(); taking this off because making the above constructor able 	to handle empty string case\
+	// m_len = 0 and m_text = nullptr vs m_text point to a \\0\
+	// \\0 takes up extra space - expensive, nullptr option is cheap.\
+	String(const String& other); //\cb2  copy constructor\cb1  : a constructor for 	a class and it defines what it means to copy that object. how do u 	construct a string from another string? usually passed by constant 	reference.\
+	String& operator=(const String& rhs);\
+	void swap(String& other);\
+	~String();\
+private:\
+	/* Invariant: \
+			\cb2 EITHER:\cb1 \
+			m_text should point to a dynamically allocated array of \
+			(m_len + 1) characters\
+			m_len >= 0;\
+			m_len = strlen(m_text);\
+			\cb2 OR:(not doing this currently)\cb1  TO MAKE THIS CLASS EASIER TO 			IMPLEMENT\
+			m_text == nullptr\
+			m_len = 0*/\
+	// char m_text[\'85]; you can never know how long the string might be\
+	char* m_text;\
+	int m_len;\
+\};\
+\
+WRONG BECAUSE:\
+char buffer[1000];\
+cin.getline(buffer, 1000);\
+String a(buffer);\
+cin.getline(buffer, 1000);\
+\
+\
+String.cpp\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+#include \'93String.h\'94\
+\
+String::String(const char* value) // value is not const, chars that are pointed to are const\
+\{\
+	if(value == nullptr)\
+		value = \'93\'94; // chars that value points to can not be changed\
+	m_len = strlen(value);\
+	m_text = new char[m_len + 1]; // +1 for \\0 \
+	strcpy(m_text, value);\
+	\
+	\
+\}\
+\
+String::String(const String& other)\
+\{\
+	m_len = other.m_len; // member function of the class can talk about 	private members of any String\
+	m_text = new char[m_len + 1];\
+	strcpy(m_text, other.m_text);\
+\}\
+\
+String& String::operator=(const String& rhs)\
+\{\
+	if (this != &rhs) // if you do (*this != rhs) you need to overload != 	operator\
+	\{\
+		/*delete [] m_text;\
+		m_len = rhs.m_len;\
+		m_text = new char[m_len+1];\
+		strcpy(m_text, rhs.m_text); // fails if lhs = rhs; fixed above 		with the if statement*/\
+		\cb2 // better way: copy and swap pattern.\cb1 \
+		String temp(rhs);\
+		swap(temp);\
+	\}\
+	return *this;\
+\}\
+\
+String::swap(String& other)\
+\{\
+	\'85 swap the m_text pointers \'85\
+	\'85 swap the m_len values \'85\
+\}\
+\
+String::~String()\
+\{\
+	delete [] m_text; // when you allocate something as an array delete 	using []\
+\}\
+\
+// code is similar to other constructor so can you one constructor. change declaration\
+/*String::String()\
+\{\
+	m_len = strlen(\'93\'94); // m_len = 0;\
+	m_text = new char[m_len + 1]; // m_text = new char[1];\
+	strcpy(m_text, \'93\'94); // m_text = \'91\\0\'92\
+\}\
+*/\
+	char buffer[1000];\
+	cin.getline(buffer, 1000);\
+	String a(buffer);\
+	cin.getline(buffer, 1000);\
+Note:\
+	WRONG!!\
+	m_len = strlen(value);\
+	m_text = value;\
+	WRONG BECAUSE:\
+	char buffer[1000];\
+	cin.getline(buffer, 1000);\
+	String a(buffer);\
+	cin.getline(buffer, 1000); // this line changes a even though it\
+	isn\'92t mentioned in the code, because you change buffer. m_len still\
+	thinks it is the length of the previous string \
+\
+in standard C++ you can\'92t declare an array of objects for which you don\'92t know the size at compile time\
+dynamically allocate an array of object. \
+int n;\
+cin >> n;\
+double a[n]; // NOT ALLOWED\
+double* a = new double a[n] // ALLOWED\
+\
+Lecture 5 \
+(Assignment Operator) - see above function h. \
+\
+Starting conditions of 	construction and assignment are different. Assignment is called on an 	already constructed object. If you don\'92t write a assignment operator for a class the compiler calls one for you. \
+\
+Generally, if you need a copy constructor you\'92ll need an assignment operator. \
+\
+Problem:\
+\'93aliasing\'94\
+two or more ways of talking about to the same thing, might be an issue with any member function\
+\
+\
+void transfer(Account& from, Account& to, double amt)\
+\{\
+	if(&from != &to)\
+	\{	\
+		from.debit(amt);\
+		to.credit(amt);\
+		if(amt >= 10000)\
+			fileForm();\
+	\}\
+\}\
+\
+Account aa[10000];\
+\
+\'85\'85\
+	transfer(aa[i], aa[j], x);\
+\'85\'85\
+\
+Review:\
+String t; <- initialisation/construction\
+String s(t); <-initialisation by copy constructor (1)\
+String u = t; <-initialisation by copying (2)\
+// (1) = (2)\
+t = s; <- assignment\
+\
+Lecture 6 - Data Structures\
+\
+struct Employee\
+\{\
+	string name;\
+	double salary;\
+	int age;\
+\};\
+\
+// default constructor, destructor and assignment operator calls those from the objects in the class. so the strings c, d, and a are called automatically.\
+\
+\
+fixed-sized array\
+dynamically allocated array\
+resizable array - changing the capacity.\
+linked lists\
+doubly linked lists\
+don\'92t need to move everything in the data structure, you don\'92t have to move everything the structure.\
+\
+\
+linked lists\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+struct Node\
+\{\
+	int m_data;\
+	Node* m_next; // not Node but pointer to Node, Node m_next \'97> will 	not compile.\
+\}; \
+\
+//last node point to the nullptr\
+//first node is called the head.\
+ \
+Node* head;\
+\'85\
+\
+while (head != nullptr) \cb2 // WRONG APPROACH!!\cb1 \
+\{\
+	cout << head->m_data << endl;\
+	head = head->m_next;\
+\} \
+// losing pointer to the first node \
+\
+for( Node* p = head; p != nullptr; p++) \cb2 //WRONG!!\cb1  pointer arithmetic only 										works when pointing into an array\
+\{\
+	cout << p->m_data << endl;\
+\}\
+\
+for(Node* p = head; p != nullptr; p = p->m_next)\
+\{\
+	cout << p->m_data << endl;\
+\} // clearer to the reader of the code (vs. while loop)\
+\
+(or)\
+\
+Node* p = head;\
+while(p != nullptr)\
+\{\
+	cout << p->m_data << endl;\
+	p = p->m_next;\
+\}\
+\
+head = nullptr; // if the list empty\
+\
+Anytime you write p-> , make sure that \
+\'97>p has previously been given a value \
+and \
+\'97>make sure p is not nullptr. \
+Do you handle the empty list correctly?\
+\
+Draw pictures!!! Trace through the code CAREFULLY!!!\
+Don\'92t do things in the wrong order!!!\
+Advice: If you\'92re creating a new node, set the values in the new Node first\
+\
+Check: normal(in middle), front, back, empty, one-element list\
+\
+Node* p;\
+for(p = head; p != nullptr && p->m_data != 42; p = p->m_next) \
+\cb2 // remember the order of evaluation \'97> check for nullptr before checking for m_data\cb1   \
+	;\
+if ( p == nullptr)\
+	cout << \'93There is no 42\'94 << endl;\
+else\
+\{\
+	Node* newGuy = new Node;\
+	newGuy->m_data = 75;\
+	newGuy->m_next = p->m_next;\
+	p->m_next = newGuy;\
+\}\
+\
+Lecture 7\
+\
+the comma operator : A, B ==> do what A says and then what B says\
+Deleting nodes:\
+\
+Node curr*;\
+Node prev*;\
+\
+for(curr = head; curr != nullptr && curr->m_data != 37; prev = curr, curr = curr->m_next) \
+// iteration through the loop with two variables to find 37\
+	; \
+// handles the empty list, if 37 is in the middle of the list and at the end of the list.\
+// but doesn\'92t handle if 37 is the first element of the list -> prev is never initialised. \
+\
+if (curr != nullptr)\
+\{\
+	if (curr == head) // if 37 is the first element of the list\
+		head = curr->m_next;\
+	else\
+		prev->m_next = curr->m_next;\
+	delete curr;\
+\}\
+\
+\
+// check all situations that might be special cases\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1 \cf0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0 \cf0 DOUBLY LINKED LISTS:\
+\
+give every node two pointers \
+next/previous	successor/predecessor\
+\
+struct Node\
+\{\
+	int m_data\
+	Node* m_next;\
+	Node* m_prev;\
+\}\
+\
+\cb2 don\'92t do things in the wrong order\cb1  \
+\
+set the values in the new node first\
+\
+check for special cases\
+\
+inserting a node newGuy\
+\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\
+\
+	newGuy->m_next = p;\
+	newGuy->m_prev = p->m_prev;\
+	p->m_prev->m_next = newGuy;\
+	p->m_prev = newGuy;\
+\
+\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\'85\
+\
+deleting nodes?\
+\
+\
+two pointers with names \
+\
+head pointer and tail pointer for easy access to the list\
+\
+effect both head and tail if the list has only one element both head and tail point to it \
+\
+CIRCULAR LINKED LISTS:\
+\
+when the last element of the linked list points to the head\
+no need for tail cause head->m_prev points to the tail\
+we know the end when the element points to the head again\
+\
+Circular Doubly linked list:\
+\'93dummy node\'94 place holder\
+head = new node;\
+head->m_next = head;\
+head->m_prev = head;\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+STACK:\
+	create an empty stack\
+	push an item onto the stack (add)\
+	pop an item off the stack (remove)\
+	look at the top item on the stack \
+	is the stack empty?\
+======== Some implementations =========\
+	how many items are in the stack?\
+	look at any item in the stack\
+\
+in the C++ std library:\
+\
+#include <stack>\
+using namespace std;\
+\
+int main()\
+\{\
+	stack<int> s; // creates an empty stack\
+	s.push(10); // top of the stack is 10, has 1 item\
+	s.push(20); // top of the stack is 20, has 2 items\
+	int n = s.top(); // n = 20;\
+	s.pop(); // removes the top value\
+	if (!s.empty()) // checks if stack is empty\
+	\{\
+		out <<s.size() << endl; // returns who many items in the stack\
+	\}\
+\}\
+\
+\
+undefined behaviour:\
+doesn\'92t make sense to use pop when the stack is empty\
+doesn\'92t make sense to use top when the stack is empty\
+\
+in C++ you must be sure that the stack is not empty when calling top or pop\
+\
+LIFO list: \'93last-in, first-out\'94 \
+\
+Lecture 8\
+\
+QUEUE:\
+	create an empty queue\
+	enqueue an item onto the queue (add)\
+	dequeue an item off the queue (remove)\
+	look at the front(head) item on the queue\
+	is the queue empty?\
+======== Some implementations =========\
+	look at the back item in the queue\
+	how many items are in the queue?\
+	look at any item in the queue\
+\
+#include <queue>\
+using namespace std;\
+\
+int main()\
+\{\
+	queue<int> x; // create an empty queue\
+	x.push(10); // enqueue an item onto the queue\
+	x.push(20); // enqueue another item\
+	int n = x.front; // look at the front(head) item\
+	x.pop(); // dequeue an item off the queue\
+	if (!x.empty())	 // is the queue empty?\
+		out << x.size(); // returns who many items in the queue\
+	out << x.back(); look at the back item in the queue\
+\}	\
+	\
+FIFO list: \'93first-in, first-out\'94\
+\
+undefined behaviour:\
+doesn\'92t make sense to use dequeue(pop) when the queue is empty\
+doesn\'92t make sense to use front when the queue is empty\
+\
+lastname = \'91SMITH\'92 and (salary > 70000 or dept = \'91IT\'92)\
+\
+lastname = \'91SMITH\'92 and (salary > 70000 or dept ^$^#^&*%^\
+\
+prefix:\
+f(x, y, z)\
+add (sub(8, div(6, 2)), 1)\
+add sub 8 div 6 2 1\
++ - 8 / 6 2 1\
+\
+infix: 8 - 6 / 2 + 1\
+\
+postfix: \
+8 6 2 / - 1 +\
+\
+IMPLEMENTING STACKS AND QUEUES USING LINKED LISTS\
+\
+Lecture 9:\
+\
+\'93ring buffer\'94 \'93circular array\'94\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+\cf0 -when you want to keep adding and taking away from queue in linked list, you will eventually reach the end\
+-but then there will lots of empty spaces in the beginning\
+-so make a circular linked list\
+\
+how to tell if queue is at the end:\
+use a variable size, and if the head is just past the tail, if it is then the array if FULL\
+\
+class Circle\
+\{\
+	void(double xnew, double ynew);\
+	void draw() const;\
+	void m_x;\
+	void m_y;\
+	void m_r;\
+\};\
+\
+class Rectangle\
+\{\
+	void(double xnew, double ynew);\
+	void draw() const;\
+	void m_x;\
+	void m_y;\
+	void m_r;\
+	void m_dx;\
+	void m_dy;\
+\};\
+\
+Circle circles[100];\
+Rectangle rects[100];\
+\
+void f(Circle &x)\
+\{\
+	x.move(\'85\'85, \'85\'85);\
+	x.draw();\
+\}\
+\
+void f(Rectangle &x)\
+\{\
+	x.move(\'85\'85, \'85\'85);\
+	x.draw();\
+\}\
+\
+for(int k = 0; k< \'85\'85; k++)\
+	circles[k].draw();\
+for(int k = 0; k< \'85\'85; k++)\
+	rects[k].draw();\
+\'85\'85\
+\
+clearly very painful every time you need to add a new shape\
+\
+Different way to implement \
+\
+Shape is a generalisation of these specialisations\
+Circle, Rectangles, etc are specialisations of Shape\
+Circle, Rectangles are subclasses, Shape is the superclass \
+Shape is a base class of Circle and Rectangle.\
+Circle and Rectangle are derived classes from Shape\
+\
+class Shape\
+\{\
+	void move(double xnew, double ynew);\
+	virtual void draw() const = 0; // pure virtual function or abstract function// dynamic binding\
+	void m_x;\
+	void m_y;\
+\};\
+\
+// Inheritance : anything you declare in the Base class is inherited by the derived classes \
+\
+class Circle : Public Shape\
+\{\
+	virtual void draw() const;\
+	void m_r;\
+\};\
+\
+class Rectangle : Public Shape\
+\{\
+	virtual void draw() const;\
+	double diag() const;\
+	void m_dx;\
+	void m_dy;\
+\};\
+\
+Shape* pic[100]; // can only have pointers cause array can only have objects of same size but each shape is a different size\
+pic[0] = new Circle; // conversion happens automatically (like int to double)\
+pic[1] = new Rectangle;\
+pic[2] = new Circle;\
+\
+// heterogeneous collection\
+void f(Shape &x)\
+\{\
+	x.move(\'85\'85, \'85\'85);\
+	x.draw();\
+\}\
+\
+for(int k = 0; k< \'85\'85; k++)\
+	pic[k]->draw();\
+======================\
+\'85\'85\
+\
+Circle c;\
+f(c);\
+\
+/*\
+static binding: \cb2 C++\cb1 \
+	Decide at compile time, which function to call associating the 	function call in code to which body it will call?\
+dynamic binding:\
+	Decide at run time which function to call based on the actual type of 	the object\
+		call the \'93appropriate\'94 function\
+*/\
+\
+class WarningSymbol: public Shape\
+\{\
+	\'85\
+	virtual void move(double new, double new);\
+	\'85\
+\};\
+void WarningSymbol::move(double new, double new)\
+\{\
+	//move like a Shape moves\
+	//but if we say move(xnew,ynew), it is calling itself, so do this:\
+\
+	Shape::move(xnew, ynew); // call base class version\
+	\'85flash 3 times\'85\
+\
+\}\
+\
+\cb2 NEVER OVERRIDE A NON-VIRTUAL FUNCTION!!!\cb1 \
+\
+void Shape::move(double xnew, double ynew) \
+\{\
+	m_x = xnew;\
+	m_y = ynew;\
+\}\
+\
+// all shapes move the same way so use inheritance; all shapes will inherit this function if they don\'92t have a move declared in the their class type \
+\
+void Shape::draw() const;\
+\{\
+	\'85 draw a cloud entered at (m_x, m_y) \'85\
+\}\
+\
+void Circle::draw() const;\
+\{\
+	\'85 draw a circle entered at (m_x, m_y) \'85\
+		\'85 with radius m_r \'85\
+\} \
+\
+void Rectangle::draw() const;\
+\{\
+	\'85 draw a Rectangle appropriately \'85\
+\}\
+\
+Derived* ==> Base*\
+Derived& ==> Base&\
+\
+Lecture 10\
+\
+concrete class \'93virtual pointer\'94 \ul vs\ulnone  abstract base class \'93pure virtual function\'94\
+concrete : you can create objects of that type\
+abstract : you can not create objects of that type, if a class has at least one pure virtual function, it is automatically abstract\
+\
+class Shape\
+\{\
+public:\
+	Shape();\
+	Shape(double x, double y);\
+	virtual ~Shape();\
+	double x() \{ return m_x; \};\
+	double y() \{ return m_y; \};\
+	\'85\
+private:\
+	double m_x;\
+	double m_y;\
+\};\
+\
+class Polygon : public Shape\
+\{\
+	\'85\
+	~Polygon();\
+	\'85\
+	Node* m_vertices;\
+\};\
+\
+class Circle : public Shape\
+\{\
+public:\
+	Circle(double r);\
+	Circle(double r, double x, double y);\
+	\'85\
+private:\
+	double m_r;\
+\};\
+\
+Shape::Shape() : m_x(0), m_y(0)\
+\{\}\
+\
+Shape::Shape(double x, double y): m_x(x), m_y(y)\
+\{\}\
+\
+Shape::~Shape()\
+\{\}\
+\
+Circle::Circle(double r, double x, double y): Shape(x , y), m_r(r) // m_x and m_y can not be called because Circle does not have access to private members of the base class \
+\{\
+	if (r <= 0)\
+		\'85\
+\}\
+\
+Circle::Circle(double r): m_r(r) // calls Shape\'92s default constructor -> centre at 0,0\
+\{\
+	\'85\
+\}\
+\
+Shape * sp;\
+sp = new Polygon(\'85\'85);\
+\'85\
+delete sp; // \cb2 uh-oh! if Shape didn\'92t have a virtual destructor or wasn\'92t implemented\cb1 \
+\
+If a class is designed to be a base class, declare and implement a virtual destructor for that class. \
+========================================\
+\
+1. Construct the base part\
+2. Construct the data members\
+3. Execute the body of the constructor\
+========================================\
+\
+1. Execute the body of the destructor\
+2. Destroy the data members\
+3. Destroy the base part\
+\
+Review of Inheritance and Polymorphism:\
+\
+Lecture 11\
+\
+Recursive function:\
+\
+sort a pile of n items:\
+	if ( n >= 2)\
+	\{\
+		split the pile into two subpiles of about n/2 items each \
+		sort the left pile\
+		sort the right pile\
+		merge the two sorted subpiles into one sorted pile		return the sorted pile\
+	\}\
+\
+For correct implementation:\
+\'97There must be at least one base case(i.e., a way of getting through the function without making any recursive calls)\
+\
+\'97Every recursive call must be to solve a \'93smaller\'94 problem (i.e., a problem \'93closer\'94 to a base case)\
+\
+void sort(int a[], int b, int e)\
+\{\
+	if (e - b >= 2 )\
+	\{\
+		int mid = (b+e)/2; // int division: odd vs even number of items in the array.\
+		sort(a, b, mid);\
+		sort(a, mid, e); \
+		merge(a, b, mid, e);\
+	\}\
+\}\
+\
+int arr[5];\
+\'85\
+sort(arr, 0, 5);\
+\
+\'93divide and conquer\'94 approach 	\
+\
+bool contains(const a[], int n,  int target)\
+\{\
+	if (n <= 0)\
+		return false;\
+	if(a[0] == target)\
+		return true;\
+	return contains(a+1, n-1, target);\
+\}\
+\
+base case, inductive step\
+\
+Lecture 12\
+\
+int minimum(int a, int b)\
+\{\
+	if(a < b)\
+		return a;\
+	else \
+		return b;\
+\}\
+\
+double minimum(double a, double b)\
+\{\
+	if(a < b)\
+		return a;\
+	else \
+		return b;\
+\}\
+\
+the above two can be written with one signal step ==> the compiler writes internal functions to suit different types during execution. \
+\
+\cb2 template <typename T>\cb1 \
+T minimum(T a, T b)\
+\{\
+	if(a < b)\
+		return a;\
+	else \
+		return b;\
+\}\
+\
+int main()\
+\{\
+	int k;\
+	cin >> k;\
+	cout << minimum(k, 10)/ 2;\
+	double x;\
+	\'85\
+	double y = 3*minimum(x*x, x+10);\
+	\'85\
+	int z = minimum(0, 3*k-k + 4);\
+\}\
+\
+\'93template argument deduction\'94\
+\
+The call has to match some template\
+template < typename T1, typename T2>\
+\
+// BAD IDEA YOU DON\'92T KNOW WHAT THE RETURN TYPE WILL BE \
+T1 minimum(T1 a, T2 b)\
+\{\
+	if(a < b)\
+		return a;\
+	else \
+		return b;\
+\}\
+\
+int main ()\
+\{\
+	string s1, s2;\
+	\'85\
+	string s3 = minimum(s1, s2);\
+	\'85\
+\} // works\
+\
+int main()\
+\{\
+	char ca1[100];\
+	char cs2[100];\
+	cin.getline(ca1, 100);\
+	cin.getline(ca2, 100);\
+	char* ca3 = minimum(ca1, ca2);\
+	\'85\
+\}\
+\
+// internal function manufactured by the compiler\
+\
+\cf4 //////////////////////////////////\
+\
+char* minimum(char* a, char* b)\
+\{\
+	if (a < b)\
+		return a;\
+	else\
+		return b;\
+\}\
+\
+//////////////////////////////////\
+\cf0 The instantiated function must do the right thing. \
+In the above case it doesn\'92t.\
+Solution to overload == > compared properly using strcmp \
+\
+char* minimum(char* a, char* b)\
+\{\
+	if (strcmp(a,b) < 0)\
+		return a;\
+	else\
+		return b;\
+\}\
+\
+int main()\
+\{\
+	Chicken c1, c2;\
+	\'85\
+	Chicken c3 = minimum(c1, c2);\
+	\'85\
+\} // wouldn\'92t work unless the < operator is overloaded for Chickens \
+\
+The instantiated function must compile \
+\
+template <typename T>\
+void f(T x)\
+\{\
+	g(x);\
+\}\
+\
+template <typename T>\
+void g(T x)\
+\{\
+	T y;\
+	\'85 minimum(x, y);\
+\}\
+\
+Review:\
+1. The call must match some template.\
+2. The instantiated template must compile.\
+3. The instantiated function must do the right thing.\
+\
+Think about situations where you would copy expensive things\
+use const reference\
+\
+// cheap option : consideration while writing template functions that use pass by value\
+T minimum(const T& a, const T& b)\
+\{\
+	if(a < b)\
+		return a;\
+	else \
+		return b;\
+\}\
+\
+T sum(const T a[], int n)\
+\{\
+	T toal = T() // T total = 0 doesn\'92t compile for this, T()-> initialises int, doubles to 	0, string = \'93\'94; pointer = nullptr; bool = false; but T has to be built in type or needs 	to have default constructor\
+		for(int k = 0; k < n; k++)\
+			total += a[k];\
+	return total;\
+\}\
+\
+int main()\
+\{\
+	double da[100];\
+	\'85\
+	cout << sum(da, 10);\
+	\'85\
+	string sa[10] = \{ \'93This \'93, \'93is \'93, \'93a \'93, \'93test.\'94\};\
+	string s = sum(sa, 4);\
+	\'85\
+\} // doesn\'92t compile if string -> total can not be initialised to 0\
+\
+Lecture 13:\
+\
+templates for Type class and STL\
+\
+class Stack\
+\{\
+	public:\
+		Stack();\
+		void push (const T& x);\
+		void pop();\
+		T top() const;\
+		int size() const;\
+	private:\
+		T m_data[100]; // only use Stack for built in type or Class type with default 		constructor \
+		int m_top;\
+\};\
+\
+template < typename T>\
+Stack<T>::Stack() : m_top(0)\
+\{\}\
+\
+template < typename T>\
+void Stack<T>::push(const T& x)\
+\{\
+	m_data[m_top] = x; // undefined if full\
+	m_top++;\
+\}\
+\
+template < typename T>\
+void Stack<T>::pop()\
+\{\
+	m_top\'97;\
+\}\
+\
+template < typename T>2\
+T Stack<T>::top() const\
+\{\
+	return m_data[m_top-1]; // undefined if empty\
+\}\
+\
+template < typename T>\
+int Stack<T>::size() const\
+\{\
+	return m_top; \
+\}\
+\
+STL - Smallberg\'92s slides\
+\
+A function f(x) is O(g(N)) if there exist N\sub o\nosupersub  and k such that for all n>= N\sub o\nosupersub , |f(N)| <= K*g(N)\
+\
+f(N) is \'93Order g(N)\'94\
+\
+when choosing an algorithm, look at the worst case and average case. \
+Linear search of an array: worst case - you don\'92t find the element \
+\
+algorithms that run on exponential time are useless beyond a small number, for a small number, it is faster than linear(think of the graph)\
+\
+for(int i = 0; i < N; i++)\
+\{\
+	c[i] = a[i] * b[i];\
+\}\
+\
+for(int = 0; i < N; i++) // O(N\super 2\nosupersub )\
+\{\
+	a[i] *= 2; // O(N)\
+	for(int j = 0; j < N; j++) // order N O(N)\
+	\{\
+		d[i][j]  = a[i]*b[j]; // this one statement in isolation - it\'92s constant time O(1)\
+	\}\
+\}\
+\
+\
+for(int = 0; i < N; i++) // O(N)\
+\{\
+	a[i] *= 2; // O(1)\
+	for(int j = 0; j < 100; j++) // constant O(1)\
+	\{\
+		d[i][j]  = a[i]*b[j]; // this one statement in isolation - it\'92s constant time O(1)\
+	\}\
+\}\
+\
+for(int = 0; i < N; i++) \
+\{\
+	a[i] *= 2; // O(1)\
+	for(int j = 0; j < 100; j++) // constant O(1)\
+	\{\
+		d[i][j]  = f(a, N); // if f is a constant time function the whole thing is O(N)\
+							// if f is an algorithm O(N) the whole thing would be O(N\super 2\nosupersub )\
+	\}\
+\}\
+\
+for(int = 0; i < N; i++) // O(N\super 2\nosupersub  log N)\
+\{\
+	a[i] *= 2; // O(1)\
+	for(int j = 0; j < 100; j++) // constant O(1)\
+	\{\
+		d[i][j]  = f(a, N); // if f is an algorithm O(N log N)\
+	\}\
+\}\
+\
+for(int = 0; i < N; i++) // O(N\super 2\nosupersub )\
+\{\
+ \
+	\'85 do i steps \'85 \
+	//sum of all integers from 0 to n-1 is proportional to O(N^2). remember sum formula n(n+1)/2\
+\
+\}\
+\
+Sorting\
+\'97\'97\'97\'97\'97\'97\'97\
+\
+\
+Trees\
+\'97\'97\'97\'97\'97\
+preorder traversal: process the root, then process the children\
+postorder traversal:\
+\
+struct Node\
+\{\
+	string data;\
+	Node* left;\
+	Node* right;\
+\};\
+\
+A binary tree is either:\
+	empty, or \
+	a node with a left binary subtree and a right binary subtree.\
+\
+A binary search tree (BST) is either:\
+	empty or \
+	a node on a left BST and a right BST such that that value at \
+	every node in the left BST 	is <= the value at this node, and the value at \
+	every node in the right BST is >= the value at this node\
+\
+void printTree(const Node* t)\
+\{\
+	if (t != nullptr)\
+	\{\
+		printTree(t->left);\
+		cout << t->data << Lendl;\
+		printTree(t->right);\
+	\}\
+\}\
+\
+Deleting a leaf node is easy.\
+\
+\
+	 \
+AVL tree:\
+height of the right subtree and the height of the left subtree differs by no more than one.\
+insertion is guaranteed order logN.\
+2-3 tree: all leaf nodes are at the same depth, every node has  1 value 2 children (or) 2 values 3 children.\
+2-3-4 tree\
+\
+#include <set>\
+using namespace std;\
+set <string> s;\
+s.insert(\'93Fred\'94);\
+s.insert(\'93Ethel\'94);\
+s.insert(\'93Lucy\'94);\
+s.insert(\'93Fred\'94);\
+s.insert(\'93Ethel\'94);\
+\
+cout << s.size(); // writes 3 \
+\
+set<string>::iterator p = s.find(\'93Ethel\'94);\
+if (p == s.end())\
+	cout << \'93Not found\'94;\
+s.erase(p);\
+\
+for (p = s.begin(); p != s.end(); p++)\
+	out << *p << Lendl; // writes Fred Lucy\
+\
+#include <map>\
+using namespace std;\
+\
+map<string, double> ious;\
+string name;\
+double amt;\
+\
+while(can >> name >> amt)\
+\{\
+	ious[name] += amt;\
+\}\
+\
+for(map<string, double>::iterator p = ious.begin(); p!= ious.end(); p++)\
+	out << p->first << \'93 owes me $\'94 << p->second << ends;\
+\
+\
+\
+\
+Hash Tables\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\'93collision\'94 - two or more keys mapped to the same buckets?\
+\
+\'93load factor\'94 = # of items/ # of items = average # of items in the linked list i.e. the approx size of each bucket, generally 0.75 (efficient)\
+\
+in general, key -> integer h <- \'93hash function\'94 \
+use bucket # (h%(# of buckets))\
+\'93hash function\'94 properties:\
+1. has be deterministic\
+2. cheap to compute\
+3. uniformly distributed\
+\
+\
+hash table with fixed number of buckets: O(N)\
+(but the constant of proportionality is very small)\
+\
+hash table with a fixed maximum load factor:O(1) - constant time\
+\
+FNV -1a variation (key is the string to hash):\
+\
+unsigned int h = 2166136261u;\
+for(int k = 0; k != key.size(); k++)\
+\{\
+	h += s[k];\
+	h *= 16777619;\
+\}\
+\
+#include <unordered_map>\
+using namespace std;\
+\
+unordered_map<string, double> ious;\
+string name;\
+double amt;\
+\
+while(can >> name >> amt)\
+\{\
+	ious[name] += amt;\
+\}\
+\
+for(unordered_map<string, double>::iterator p = ious.begin(); p!= ious.end(); p++)\
+	out << p->first << \'93 owes me $\'94 << p->second << ends;\
+\
+\
+for(auto p = ious.begin(); p!= ious.end(); p++)\
+// auto p = unordered_map<string, double>::iterator p\
+	out << p->first << \'93 owes me $\'94 << p->second << ends;\
+\
+Incremental rehashing -> constant time for every operation\
+\
+insert N items into a hash table (with a fixed maximum load factor): O(N)\
+insert N items into a binary search tree:O(N logN)\
+\
+A complete binary tree is a binary tree in which every level is filled, except possible the bottom level, which is filled from left to right\
+\
+A maxheap (or just a heap) is a complete binary tree where the value at every node is >= the values in that node\'92s descendants.\
+\
+A minheap is a complete binary tree where the value at every node is <= the values in that node\'92s descendants.\
+\
+Mnemonic for heap insertion and removal: first make it a complete binary tree, then fix the heap property, starting at the inserted or moved node\
+\
+insert: add a new node to make a complete binary tree, then bubble it up to proper place O(log N)\
+\
+removing biggest item: remove the root and replace it with the bottom-rightmost item(restoring the complete binary tree property) then trickle that item down to its proper place O(log N)\
+}
